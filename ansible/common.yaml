@@ -1,0 +1,12 @@
+- name: All | Disable auto updates on Ubuntu
+  ansible.builtin.copy:
+    dest: /etc/apt/apt.conf.d/20auto-upgrades
+    content: |
+      APT::Periodic::Update-Package-Lists "0";
+      APT::Periodic::Unattended-Upgrade "0";
+  when: ansible_distribution == 'Ubuntu'
+
+- name: All | Set hostname
+  ansible.builtin.hostname:
+    name: "{{ inventory_hostname }}"
+    use: "systemd"

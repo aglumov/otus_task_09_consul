@@ -1,0 +1,32 @@
+[lb]
+%{ for i, host in lb_vm_names ~}
+${lb_vm_names[i]}	ansible_host=${lb_ip_address_list[i]}	wan_ip=${lb_nat_ip_address_list[i]}
+%{ endfor ~}
+
+[db]
+%{ for i, host in db_vm_names ~}
+${db_vm_names[i]}	ansible_host=${db_ip_address_list[i]}
+%{ endfor ~}
+
+[app]
+%{ for i, host in app_vm_names ~}
+${app_vm_names[i]}	ansible_host=${app_ip_address_list[i]}
+%{ endfor ~}
+
+[consul]
+%{ for i, host in consul_vm_names ~}
+${consul_vm_names[i]}	ansible_host=${consul_ip_address_list[i]}
+%{ endfor ~}
+
+[all:vars]
+public_ip=${lb_nat_ip_address_list[0]}
+ansible_user=ubuntu
+
+[lb:vars]
+srv_name=balancer
+domain=${domain_name}
+token=${domain_token}
+org=${domain_org}
+
+[app:vars]
+srv_name=wordpress

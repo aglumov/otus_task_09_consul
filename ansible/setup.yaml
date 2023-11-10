@@ -1,0 +1,80 @@
+---
+- name: Install and configure Loadbalancer, Apps and Database
+  hosts: all
+  become: true
+
+  vars:
+    db_packages:
+    - mariadb-server
+    - python3-pip
+    lb_packages:
+    - nginx
+    - jq
+    app_packages:
+    - nginx
+    - php-fpm
+    - php-mysql
+    - unzip
+    consul_packages:
+    - unzip
+    consul_data_dir: "/var/lib/consul"
+    wp_db_name: "wordpress"
+    wp_db_user: "wordpress"
+    wp_db_pass: "wordpresspassword"
+    wp_db_host: "{{ hostvars['db0'].ansible_host }}"
+
+  tasks:
+  - name: All | Common tasks
+    include_tasks: "common.yaml"
+
+  - name: Database | Install and configure Database
+    include_tasks: "db.yaml"
+    when: inventory_hostname in groups["db"]
+
+  - name: Wordpress | Install and configure Wordpress
+    include_tasks: "app.yaml"
+    when: inventory_hostname in groups["app"]
+
+  - name: Loadbalancer | Install and configure Loadbalancer
+    include_tasks: "lb.yaml"
+    when: inventory_hostname in groups["lb"]
+
+  - name: Consul  | Install and configure consul server
+    include_tasks: "consul-server.yaml"
+    when: inventory_hostname in groups["consul"]
+
+  - name: Consul Client  | Install and configure consul client
+    include_tasks: "consul-client.yaml"
+    when: (inventory_hostname in groups["lb"]) or
+          (inventory_hostname in groups["app"])
+
+  - name: Consul  | Install and configure consul template
+    include_tasks: "consul-template.yaml"
+    when: inventory_hostname in groups["lb"]
+
+  handlers:
+  - name: restart php-fpm
+    ansible.builtin.systemd:
+      name: "php8.1-fpm.service"
+      state: restarted
+  
+  - name: reload consul
+    ansible.builtin.systemd:
+      name: "consul"
+      state: reloaded
+
+  - name: reload nginx
+    ansible.builtin.systemd:
+      name: "nginx"
+      state: reloaded
+
+  - name: restart mariadb-server
+    ansible.builtin.systemd:
+      name: "mariadb.service"
+      state: restarted
+
+  - name: reload consul-template
+    ansible.builtin.systemd:
+      name: consul-template
+      state: reloaded
+      daemon_reload: true

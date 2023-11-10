@@ -1,0 +1,5 @@
+upstream @wordpress {
+{% for i in groups.app %}
+  server {{ hostvars[i].ansible_host }}:80 max_fails=1;
+{% endfor %}
+}

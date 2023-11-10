@@ -1,0 +1,32 @@
+https://oauth.yandex.ru/authorize?response_type=token&client_id=
+
+https://yandex.ru/dev/api360/doc/concepts/access.html
+
+client id a1358d2d2e6b4b738d38693c9b987807
+client secret 2d38a4c7124c4f72b6974fab135b54b7
+
+oauth token y0_AgAEA7qhqj6VAArGUgAAAADxKX7pL3kjIqZzTCGNuIQETZjCKgNoVrM
+
+
+
+GET /directory/v1/org
+
+
+
+GET /directory/v1/org/{orgId}/domains/{domain}/dns
+
+
+
+TEST2=$(curl -XGET -H 'Authorization: OAuth y0_AgAEA7qhqj6VAArGUgAAAADxKX7pL3kjIqZzTCGNuIQETZjCKgNoVrM' https://api360.yandex.net/directory/v1/org/80000/domains/glumov.it/dns?perPage=50 | jq -c '.records[] | select(.name == "influxdb")')
+for i in $TEST2; do echo r_id=$(echo $i | jq .recordId ) and addr=$(echo $i | jq .address); echo ; done
+
+DELETE https://api360.yandex.net/directory/v1/org/{orgId}/domains/{domain}/dns/{recordId}
+
+
+POST https://api360.yandex.net/directory/v1/org/{orgId}/domains/{domain}/dns
+{
+  "address": string,
+  "name": string,
+  "ttl": integer,
+  "type": string,
+}
