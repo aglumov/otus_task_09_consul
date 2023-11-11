@@ -4,3 +4,4 @@
 *.auto.tfvars
 ansible/inventory.ini
 ansible/binaries/*
+ansible/notes.txt
